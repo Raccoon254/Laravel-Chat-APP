@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+require __DIR__.'/auth.php';
+
 Route::get('/playground', function () {
     event(new App\Events\PlayGroundEvent());
     return null;
@@ -37,4 +41,18 @@ Route::get('/ws', function () {
     return view('websocket');
 });
 
-require __DIR__.'/auth.php';
+
+Route::post('/chat-message', function (Request $request) {
+    // Logic to handle the chat message submission
+    event(new App\Events\ChatMessageEvent($request->message, auth()->user()));
+    return null;
+});
+
+Route::get('/user', function () {
+    return response()->json([
+        'user' => Auth::user(),
+    ]);
+});
+
+
+

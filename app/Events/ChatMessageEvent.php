@@ -2,24 +2,28 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
+use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class PlayGroundEvent implements ShouldBroadcast
+class ChatMessageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    private string $message;
+    private User $user;
 
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(string $message ,User $user)
     {
-        //
+        $this->user = $user;
+        $this->message = $message;
+        // $this->dontBroadcastToCurrentUser();
     }
 
     /**
@@ -30,19 +34,20 @@ class PlayGroundEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('Public.playground.1'),
+            new PrivateChannel('private.chat.1'),
         ];
     }
 
     public function broadcastAs(): string
     {
-        return 'Play=GroundEvent';
+        return 'chat-message';
     }
 
     public function broadcastWith(): array
     {
         return [
-            'message' => 'Hello World',
+            'Message' => $this->message,
+            'User' => $this->user->only(['name', 'email']),
         ];
     }
 }
